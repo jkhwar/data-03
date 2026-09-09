@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한강러너 · 마라톤 동호회</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --deep-blue:#0B3D5C;
+    --sky-blue:#3E8FC4;
+    --pale-sky:#E8F3FA;
+    --han-teal:#1F6E6E;
+    --coral:#F0956B;
+    --white:#FFFFFF;
+    --ink:#0E2A3B;
+    --line: rgba(11,61,92,0.12);
+    --radius-s: 6px;
+    --radius-m: 10px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    color:var(--ink);
+    background:var(--white);
+    line-height:1.5;
+  }
+  a{color:inherit; text-decoration:none;}
+  ul{list-style:none;}
+  button{font-family:inherit; cursor:pointer; border:none;}
+  img{max-width:100%; display:block;}
+  textarea{font-family:inherit;}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 28px;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:100;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; max-width:1120px; margin:0 auto;
+  }
+  .logo{
+    font-weight:800; font-size:20px; color:var(--deep-blue);
+    display:flex; align-items:center; gap:8px; letter-spacing:-0.02em;
+  }
+  .logo .dot{color:var(--coral);}
+  .nav-links{display:flex; gap:28px; font-size:15px; font-weight:500; color:var(--deep-blue);}
+  .nav-links a{opacity:0.75; transition:opacity .2s;}
+  .nav-links a:hover{opacity:1;}
+  .nav-cta{display:flex; align-items:center; gap:12px;}
+  .btn{
+    padding:10px 20px; border-radius:999px; font-weight:600; font-size:14px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary{background:var(--deep-blue); color:#fff;}
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(11,61,92,.25);}
+  .btn-ghost{background:transparent; color:var(--deep-blue); border:1px solid var(--line);}
+  .btn-ghost:hover{background:var(--pale-sky);}
+  #userBadge{font-size:14px; font-weight:600; color:var(--han-teal); display:none; align-items:center; gap:8px;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative; overflow:hidden;
+    background:linear-gradient(180deg, #CFE8FA 0%, #A9D4F0 38%, #6FB2DD 68%, #3E8FC4 100%);
+    padding:96px 28px 0;
+    min-height:640px;
+  }
+  .hero-river{
+    position:absolute; left:0; right:0; bottom:0; height:150px;
+    background:linear-gradient(180deg, rgba(31,110,110,0) 0%, #1F6E6E 55%, #164e4e 100%);
+    clip-path: ellipse(75% 100% at 50% 100%);
+  }
+  .hero-inner{
+    position:relative; z-index:2; max-width:1120px; margin:0 auto;
+    text-align:center;
+  }
+  .hero-eyebrow{
+    display:inline-block; font-size:14px; font-weight:700; color:var(--deep-blue);
+    background:rgba(255,255,255,0.55); padding:7px 16px; border-radius:999px;
+    margin-bottom:22px; border:1px solid rgba(255,255,255,.6);
+  }
+  .hero h1{
+    font-size:clamp(36px, 5.4vw, 62px); font-weight:800; letter-spacing:-0.03em;
+    color:var(--deep-blue); line-height:1.18;
+  }
+  .hero h1 .accent{color:var(--white); -webkit-text-stroke: 1px var(--deep-blue);}
+  .hero p.lead{
+    max-width:520px; margin:24px auto 0; font-size:17px; color:#0B3D5C; opacity:0.82;
+    font-weight:500;
+  }
+  .hero-actions{display:flex; gap:12px; justify-content:center; margin-top:36px;}
+  .hero-actions .btn{padding:14px 28px; font-size:15px;}
+  .btn-coral{background:var(--coral); color:#fff;}
+  .btn-coral:hover{transform:translateY(-1px); box-shadow:0 8px 20px rgba(240,149,107,.4);}
+
+  .runner-trail{position:relative; z-index:2; height:140px; margin-top:48px;}
+  .runner-trail .track{
+    position:absolute; left:0; right:0; top:50%; height:2px;
+    background:repeating-linear-gradient(90deg, rgba(11,61,92,.35) 0 10px, transparent 10px 20px);
+  }
+  .runner{position:absolute; top:50%; font-size:28px; transform:translateY(-50%); animation: run-bob 1.8s ease-in-out infinite;}
+  @keyframes run-bob{ 0%,100%{ transform:translateY(-50%) translateY(0); } 50%{ transform:translateY(-50%) translateY(-8px); } }
+  .runner:nth-child(2){ left:8%; animation-delay:0s; font-size:24px;}
+  .runner:nth-child(3){ left:28%; animation-delay:.3s; font-size:32px;}
+  .runner:nth-child(4){ left:50%; animation-delay:.15s; font-size:26px;}
+  .runner:nth-child(5){ left:70%; animation-delay:.4s; font-size:30px;}
+  .runner:nth-child(6){ left:88%; animation-delay:.1s; font-size:24px;}
+
+  .stats-strip{position:relative; z-index:2; display:flex; justify-content:center; gap:64px; padding:28px 0 44px; flex-wrap:wrap;}
+  .stat{text-align:center;}
+  .stat .num{font-size:34px; font-weight:800; color:var(--deep-blue); letter-spacing:-0.02em;}
+  .stat .label{font-size:13px; color:var(--deep-blue); opacity:.72; font-weight:600; margin-top:2px;}
+
+  /* ---------- Section shared ---------- */
+  section{padding:88px 0;}
+  .section-head{margin-bottom:44px; display:flex; justify-content:space-between; align-items:flex-end; gap:20px; flex-wrap:wrap;}
+  .section-head .tag{font-size:13px; font-weight:700; color:var(--han-teal); margin-bottom:10px; display:block;}
+  .section-head h2{font-size:clamp(26px, 3.4vw, 36px); font-weight:800; color:var(--deep-blue); letter-spacing:-0.02em;}
+  .section-head p{margin-top:12px; color:#4A6577; font-size:15.5px; max-width:560px;}
+
+  /* ---------- Meetup type explainer ---------- */
+  .types{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  .type-card{border-radius:16px; padding:32px; position:relative; overflow:hidden;}
+  .type-card.quarter{background:var(--deep-blue); color:#fff;}
+  .type-card.weekly{background:var(--pale-sky); color:var(--deep-blue); border:1px solid var(--line);}
+  .type-card .icon{font-size:34px; margin-bottom:16px;}
+  .type-card h3{font-size:22px; font-weight:800; margin-bottom:10px;}
+  .type-card p{font-size:14.5px; opacity:.85; line-height:1.6;}
+  .type-card .freq{display:inline-block; margin-top:18px; font-size:13px; font-weight:700; padding:6px 14px; border-radius:999px;}
+  .type-card.quarter .freq{background:rgba(255,255,255,.15); color:#fff;}
+  .type-card.weekly .freq{background:#fff; color:var(--han-teal); border:1px solid var(--line);}
+
+  /* ---------- Filter chips (shared: meetup + board) ---------- */
+  .filter-bar{display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap; align-items:center; justify-content:space-between;}
+  .filter-chips{display:flex; gap:10px; flex-wrap:wrap;}
+  .filter-chip{padding:9px 18px; border-radius:999px; font-size:14px; font-weight:600; background:#fff; border:1px solid var(--line); color:var(--deep-blue); transition:all .15s ease;}
+  .filter-chip.active{background:var(--deep-blue); color:#fff; border-color:var(--deep-blue);}
+  .filter-chip:hover{border-color:var(--sky-blue);}
+
+  /* ---------- Meetup list ---------- */
+  .meetup-list{display:flex; flex-direction:column; gap:14px;}
+  .meetup-row{display:grid; grid-template-columns:96px 1fr auto auto; align-items:center; gap:20px; padding:20px 24px; border-radius:14px; border:1px solid var(--line); background:#fff; transition:border-color .15s ease, box-shadow .15s ease;}
+  .meetup-row:hover{border-color:var(--sky-blue); box-shadow:0 8px 24px rgba(11,61,92,.08);}
+  .meetup-date{text-align:center; border-right:1px solid var(--line); padding-right:20px;}
+  .meetup-date .d{font-size:26px; font-weight:800; color:var(--deep-blue); line-height:1;}
+  .meetup-date .m{font-size:12px; font-weight:700; color:var(--han-teal); margin-top:4px;}
+  .meetup-info .badge{display:inline-block; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px; margin-bottom:8px;}
+  .badge.quarter{background:#0B3D5C; color:#fff;}
+  .badge.weekly{background:var(--pale-sky); color:var(--han-teal);}
+  .badge.notice{background:var(--coral); color:#fff;}
+  .badge.free{background:var(--pale-sky); color:var(--han-teal);}
+  .badge.photo{background:#EAF1FB; color:var(--sky-blue);}
+  .meetup-info h4{font-size:17px; font-weight:700; color:var(--ink);}
+  .meetup-info .meta{font-size:13.5px; color:#5A7383; margin-top:5px; display:flex; gap:14px; flex-wrap:wrap;}
+  .meetup-stat{text-align:center; min-width:70px;}
+  .meetup-stat .v{font-size:16px; font-weight:800; color:var(--sky-blue);}
+  .meetup-stat .l{font-size:11px; color:#8098A6; font-weight:600;}
+  .apply-btn{padding:10px 22px; border-radius:999px; background:var(--coral); color:#fff; font-weight:700; font-size:13.5px; white-space:nowrap;}
+  .apply-btn:hover{transform:translateY(-1px);}
+  .apply-btn:disabled{background:#C9D6DC; cursor:not-allowed; transform:none;}
+  .apply-btn.applied{background:var(--han-teal);}
+
+  .empty-state{text-align:center; padding:60px 20px; color:#8098A6; font-size:14.5px; border:1px dashed var(--line); border-radius:14px;}
+
+  /* ---------- Board ---------- */
+  .board-list{display:flex; flex-direction:column; border-top:1px solid var(--line);}
+  .post-row{display:grid; grid-template-columns:90px 1fr 120px 90px 70px; align-items:center; gap:16px; padding:16px 12px; border-bottom:1px solid var(--line); cursor:pointer; transition:background .15s ease;}
+  .post-row:hover{background:var(--pale-sky);}
+  .post-row .cat{text-align:center;}
+  .post-row .title-cell{min-width:0;}
+  .post-row .title-cell .t{font-size:15px; font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .post-row .title-cell .cmt-count{font-size:12.5px; color:var(--sky-blue); font-weight:700; margin-left:6px;}
+  .post-row .author{font-size:13px; color:#5A7383; text-align:center;}
+  .post-row .date{font-size:12.5px; color:#8098A6; text-align:center;}
+  .post-row .views{font-size:12.5px; color:#8098A6; text-align:center;}
+  .write-btn{padding:11px 22px; border-radius:999px; background:var(--deep-blue); color:#fff; font-weight:700; font-size:14px;}
+  .write-btn:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(11,61,92,.25);}
+
+  /* ---------- Regions ---------- */
+  .region-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  .region-card{padding:24px; border-radius:14px; background:var(--pale-sky); border:1px solid transparent; transition:all .18s ease; cursor:pointer;}
+  .region-card:hover{background:#fff; border-color:var(--sky-blue); transform:translateY(-3px);}
+  .region-card .river-emoji{font-size:26px; margin-bottom:12px;}
+  .region-card h4{font-size:16px; font-weight:700; color:var(--deep-blue);}
+  .region-card p{font-size:13px; color:#5A7383; margin-top:8px; line-height:1.55;}
+  .region-card .count{font-size:12px; font-weight:700; color:var(--han-teal); margin-top:14px;}
+
+  /* ---------- Auth panel ---------- */
+  .auth-panel{max-width:420px; margin:0 auto; padding:36px; border-radius:18px; background:var(--deep-blue); color:#fff;}
+  .auth-panel h3{font-size:22px; font-weight:800; margin-bottom:6px;}
+  .auth-panel p.sub{font-size:13.5px; opacity:.75; margin-bottom:24px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12.5px; font-weight:600; opacity:.8; margin-bottom:6px;}
+  .field input, .field select, .field textarea{width:100%; padding:11px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:#fff; font-size:14px; font-family:inherit;}
+  .field input::placeholder, .field textarea::placeholder{color:rgba(255,255,255,.4);}
+  .field select option{color:#0E2A3B;}
+  .auth-toggle{display:flex; gap:8px; margin-bottom:22px; background:rgba(255,255,255,.08); padding:4px; border-radius:10px;}
+  .auth-toggle button{flex:1; padding:9px; border-radius:8px; font-weight:700; font-size:13.5px; color:#fff; opacity:.6; background:transparent;}
+  .auth-toggle button.active{background:#fff; color:var(--deep-blue); opacity:1;}
+  .auth-submit{width:100%; padding:13px; border-radius:8px; background:var(--coral); color:#fff; font-weight:700; font-size:14.5px; margin-top:6px;}
+  .auth-msg{font-size:13px; margin-top:12px; text-align:center; min-height:18px;}
+
+  /* ---------- Modal (게시판 글쓰기/수정/상세) ---------- */
+  .modal-overlay{position:fixed; inset:0; background:rgba(11,42,59,.55); display:none; align-items:center; justify-content:center; z-index:1000; padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal-box{background:#fff; border-radius:18px; width:100%; max-width:560px; max-height:88vh; overflow-y:auto; padding:32px;}
+  .modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:22px;}
+  .modal-head h3{font-size:19px; font-weight:800; color:var(--deep-blue);}
+  .modal-close{width:32px; height:32px; border-radius:50%; background:var(--pale-sky); color:var(--deep-blue); font-size:16px; display:flex; align-items:center; justify-content:center;}
+  .modal-close:hover{background:#dcebf5;}
+  .field-dark label{color:var(--deep-blue); opacity:.8;}
+  .field-dark input, .field-dark select, .field-dark textarea{background:var(--pale-sky); border:1px solid var(--line); color:var(--ink);}
+  .field-dark input::placeholder, .field-dark textarea::placeholder{color:#9FB3BF;}
+  .field-dark select option{color:var(--ink);}
+  .modal-submit{width:100%; padding:13px; border-radius:8px; background:var(--deep-blue); color:#fff; font-weight:700; font-size:14.5px; margin-top:8px;}
+  .modal-submit:hover{background:#0a3350;}
+
+  .detail-badge{display:inline-block; font-size:12px; font-weight:700; padding:4px 12px; border-radius:999px; margin-bottom:12px;}
+  .detail-title{font-size:21px; font-weight:800; color:var(--ink); margin-bottom:10px; line-height:1.35;}
+  .detail-meta{font-size:13px; color:#5A7383; display:flex; gap:12px; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .detail-content{font-size:15px; color:var(--ink); line-height:1.75; white-space:pre-wrap; margin-bottom:18px;}
+  .detail-image{border-radius:12px; margin-bottom:20px; width:100%;}
+  .detail-actions{display:flex; gap:8px; margin-bottom:24px;}
+  .detail-actions button{padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; border:1px solid var(--line); background:#fff; color:var(--deep-blue);}
+  .detail-actions button:hover{background:var(--pale-sky);}
+  .detail-actions button.danger{color:#C0503A; border-color:#F2C6B4;}
+  .detail-actions button.danger:hover{background:#FBEDE7;}
+
+  .comments-head{font-size:14px; font-weight:700; color:var(--deep-blue); margin-bottom:14px;}
+  .comment-item{padding:12px 0; border-bottom:1px solid var(--line);}
+  .comment-item .c-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;}
+  .comment-item .c-author{font-size:13.5px; font-weight:700; color:var(--deep-blue);}
+  .comment-item .c-date{font-size:11.5px; color:#8098A6;}
+  .comment-item .c-content{font-size:14px; color:var(--ink); line-height:1.55;}
+  .comment-item .c-del{font-size:12px; color:#C0503A; opacity:.8; margin-top:4px;}
+  .comment-item .c-del:hover{opacity:1;}
+  .comment-form{display:flex; gap:8px; margin-top:16px;}
+  .comment-form textarea{flex:1; padding:10px 14px; border-radius:8px; border:1px solid var(--line); background:var(--pale-sky); font-size:13.5px; font-family:inherit; resize:none; height:44px;}
+  .comment-form button{padding:0 20px; border-radius:8px; background:var(--deep-blue); color:#fff; font-weight:700; font-size:13px;}
+  .comments-empty{font-size:13.5px; color:#8098A6; padding:16px 0; text-align:center;}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--deep-blue); color:#fff; padding:56px 0 32px;}
+  .footer-top{display:flex; justify-content:space-between; flex-wrap:wrap; gap:32px; margin-bottom:40px;}
+  .footer-logo{font-size:19px; font-weight:800;}
+  .footer-logo .dot{color:var(--coral);}
+  .footer-tag{font-size:13.5px; opacity:.6; margin-top:10px; max-width:280px; line-height:1.6;}
+  .footer-cols{display:flex; gap:56px;}
+  .footer-col h5{font-size:12.5px; font-weight:700; opacity:.55; margin-bottom:14px; letter-spacing:.02em;}
+  .footer-col a{display:block; font-size:14px; opacity:.85; margin-bottom:10px;}
+  .footer-bottom{border-top:1px solid rgba(255,255,255,.12); padding-top:24px; font-size:12.5px; opacity:.5; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+
+  /* Toast */
+  .toast{position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--deep-blue); color:#fff; padding:14px 24px; border-radius:999px; font-size:14px; font-weight:600; box-shadow:0 12px 30px rgba(0,0,0,.2); opacity:0; pointer-events:none; transition:all .25s ease; z-index:1200;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media (max-width: 860px){
+    .nav-links{display:none;}
+    .types{grid-template-columns:1fr;}
+    .region-grid{grid-template-columns:1fr 1fr;}
+    .meetup-row{grid-template-columns:70px 1fr; grid-template-areas:"date info" "date stat" "date btn";}
+    .meetup-stat{display:none;}
+    .post-row{grid-template-columns:60px 1fr 60px; }
+    .post-row .author, .post-row .date{display:none;}
+    .stats-strip{gap:32px;}
+    .footer-top{flex-direction:column;}
+    .footer-cols{gap:36px;}
+    .section-head{flex-direction:column; align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <div class="logo">한강러너<span class="dot">.</span></div>
+    <ul class="nav-links">
+      <li><a href="#meetups">모임 일정</a></li>
+      <li><a href="#board">게시판</a></li>
+      <li><a href="#regions">지역별 모임</a></li>
+      <li><a href="#join">회원가입</a></li>
+    </ul>
+    <div class="nav-cta">
+      <span id="userBadge"></span>
+      <a href="#join" class="btn btn-ghost" id="loginBtn">로그인</a>
+      <button class="btn btn-primary" id="logoutBtn" style="display:none;">로그아웃</button>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <span class="hero-eyebrow">🏙️ 서울 한강변 러닝 크루</span>
+    <h1>오늘도, 한강을 따라<br><span class="accent">함께</span> 달립니다</h1>
+    <p class="lead">분기별 정기 모임과 매주 열리는 소규모 러닝으로, 내가 사는 동네 강변에서 페이스 맞는 러너를 만나보세요.</p>
+    <div class="hero-actions">
+      <a href="#meetups" class="btn btn-coral">이번 주 모임 보기</a>
+      <a href="#join" class="btn btn-ghost" style="background:rgba(255,255,255,.5); border-color:rgba(255,255,255,.6);">회원가입</a>
+    </div>
+  </div>
+
+  <div class="runner-trail wrap">
+    <div class="track"></div>
+    <span class="runner">🏃</span>
+    <span class="runner">🏃‍♀️</span>
+    <span class="runner">🏃</span>
+    <span class="runner">🏃‍♂️</span>
+    <span class="runner">🏃‍♀️</span>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat"><div class="num" id="statRegions">4</div><div class="label">활동 지역</div></div>
+    <div class="stat"><div class="num" id="statMeetups">-</div><div class="label">예정된 모임</div></div>
+    <div class="stat"><div class="num" id="statMembers">-</div><div class="label">가입 러너</div></div>
+    <div class="stat"><div class="num">42.195</div><div class="label">우리의 목표, km</div></div>
+  </div>
+
+  <div class="hero-river"></div>
+</section>
+
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag">HOW IT WORKS</span>
+        <h2>두 가지 리듬으로 달립니다</h2>
+        <p>큰 호흡의 분기별 정기 모임과, 가벼운 마음으로 참여하는 매주 소모임. 나에게 맞는 방식으로 러닝을 시작하세요.</p>
+      </div>
+    </div>
+    <div class="types">
+      <div class="type-card quarter">
+        <div class="icon">🏁</div>
+        <h3>분기별 정기 모임</h3>
+        <p>계절이 바뀔 때마다 전 지역 러너가 한자리에 모입니다. 함께 완주하고, 기록을 나누고, 다음 시즌을 계획하는 자리입니다.</p>
+        <span class="freq">연 4회 · 3개월마다</span>
+      </div>
+      <div class="type-card weekly">
+        <div class="icon">🌤️</div>
+        <h3>매주 소규모 모임</h3>
+        <p>같은 동네, 비슷한 페이스의 러너 5~10명이 매주 정해진 요일 저녁 강변에서 짧게 달립니다. 부담 없이 신청하고 참여하세요.</p>
+        <span class="freq">매주 · 지역별 상시 운영</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="meetups" style="background:var(--pale-sky);">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag">SCHEDULE</span>
+        <h2>다가오는 모임</h2>
+        <p>참여하고 싶은 모임을 찾아 신청하세요. 로그인 후 바로 신청할 수 있어요.</p>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-chips">
+        <button class="filter-chip active" data-filter="전체">전체</button>
+        <button class="filter-chip" data-filter="정기모임">🏁 정기모임</button>
+        <button class="filter-chip" data-filter="소모임">🌤️ 소모임</button>
+      </div>
+    </div>
+    <div class="meetup-list" id="meetupList">
+      <div class="empty-state">모임 정보를 불러오는 중입니다…</div>
+    </div>
+  </div>
+</section>
+
+<section id="board">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag">COMMUNITY</span>
+        <h2>게시판</h2>
+        <p>공지사항을 확인하고, 자유롭게 이야기 나누고, 완주 인증샷을 자랑해보세요.</p>
+      </div>
+      <button class="write-btn" id="writePostBtn">✏️ 글쓰기</button>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-chips">
+        <button class="filter-chip active" data-board-filter="전체">전체</button>
+        <button class="filter-chip" data-board-filter="공지사항">📌 공지사항</button>
+        <button class="filter-chip" data-board-filter="자유게시판">💬 자유게시판</button>
+        <button class="filter-chip" data-board-filter="인증샷">📸 인증샷</button>
+      </div>
+    </div>
+    <div class="board-list" id="boardList">
+      <div class="empty-state">게시글을 불러오는 중입니다…</div>
+    </div>
+  </div>
+</section>
+
+<section id="regions" style="background:var(--pale-sky);">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="tag">WHERE WE RUN</span>
+        <h2>지역별 러닝 코스</h2>
+        <p>사는 곳 근처, 혹은 뛰어보고 싶은 강변을 골라보세요.</p>
+      </div>
+    </div>
+    <div class="region-grid" id="regionGrid">
+      <div class="empty-state">지역 정보를 불러오는 중입니다…</div>
+    </div>
+  </div>
+</section>
+
+<section id="join">
+  <div class="wrap">
+    <div class="section-head" style="text-align:center; justify-content:center;">
+      <div>
+        <span class="tag">GET STARTED</span>
+        <h2>한강러너와 함께하기</h2>
+        <p style="margin-left:auto; margin-right:auto;">이메일로 간단히 가입하고, 원하는 모임에 바로 신청해보세요.</p>
+      </div>
+    </div>
+    <div class="auth-panel">
+      <div class="auth-toggle">
+        <button id="tabSignup" class="active">회원가입</button>
+        <button id="tabLogin">로그인</button>
+      </div>
+
+      <div id="signupForm">
+        <h3>지금 바로 시작하세요</h3>
+        <p class="sub">닉네임과 지역만 정하면 5초 만에 가입 완료</p>
+        <div class="field">
+          <label>이메일</label>
+          <input type="email" id="suEmail" placeholder="runner@example.com">
+        </div>
+        <div class="field">
+          <label>비밀번호</label>
+          <input type="password" id="suPassword" placeholder="6자 이상">
+        </div>
+        <div class="field">
+          <label>닉네임</label>
+          <input type="text" id="suNickname" placeholder="예: 한강달리기왕">
+        </div>
+        <div class="field">
+          <label>활동 지역</label>
+          <select id="suRegion"><option value="">지역을 선택하세요</option></select>
+        </div>
+        <div class="field">
+          <label>페이스 수준</label>
+          <select id="suPace">
+            <option value="입문">입문 (7:00/km 이상)</option>
+            <option value="초급">초급 (6:00~7:00/km)</option>
+            <option value="중급">중급 (5:00~6:00/km)</option>
+            <option value="고급">고급 (4:00~5:00/km)</option>
+            <option value="서브3">서브3 (4:00/km 이하)</option>
+          </select>
+        </div>
+        <button class="auth-submit" id="signupBtn">회원가입하고 시작하기</button>
+        <div class="auth-msg" id="signupMsg"></div>
+      </div>
+
+      <div id="loginForm" style="display:none;">
+        <h3>다시 만나서 반가워요</h3>
+        <p class="sub">가입하신 이메일로 로그인하세요</p>
+        <div class="field">
+          <label>이메일</label>
+          <input type="email" id="liEmail" placeholder="runner@example.com">
+        </div>
+        <div class="field">
+          <label>비밀번호</label>
+          <input type="password" id="liPassword" placeholder="비밀번호">
+        </div>
+        <button class="auth-submit" id="loginSubmitBtn">로그인</button>
+        <div class="auth-msg" id="loginMsg"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">한강러너<span class="dot">.</span></div>
+        <p class="footer-tag">서울 한강변을 따라 달리는 사람들의 모임. 분기별 정기 모임과 매주 소모임으로 함께 완주합니다.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h5>모임</h5>
+          <a href="#meetups">모임 일정</a>
+          <a href="#regions">지역별 모임</a>
+        </div>
+        <div class="footer-col">
+          <h5>커뮤니티</h5>
+          <a href="#board">게시판</a>
+          <a href="#join">회원가입</a>
+        </div>
+        <div class="footer-col">
+          <h5>안내</h5>
+          <a href="#">이용약관</a>
+          <a href="#">개인정보처리방침</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>[강의용 샘플] 한강러너 · 마라톤 동호회 웹사이트 데모</span>
+      <span>© 2026 한강러너</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ---------- 게시글 작성/수정 모달 ---------- -->
+<div class="modal-overlay" id="postModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="postModalTitle">새 글쓰기</h3>
+      <button class="modal-close" id="postModalClose">✕</button>
+    </div>
+    <div class="field field-dark">
+      <label>게시판 종류</label>
+      <select id="postCategory">
+        <option value="자유게시판">💬 자유게시판</option>
+        <option value="공지사항">📌 공지사항</option>
+        <option value="인증샷">📸 인증샷</option>
+      </select>
+    </div>
+    <div class="field field-dark">
+      <label>제목</label>
+      <input type="text" id="postTitle" placeholder="제목을 입력하세요">
+    </div>
+    <div class="field field-dark">
+      <label>내용</label>
+      <textarea id="postContent" rows="6" placeholder="내용을 입력하세요" style="height:140px; resize:vertical;"></textarea>
+    </div>
+    <div class="field field-dark">
+      <label>이미지 URL (선택, 인증샷에 추천)</label>
+      <input type="text" id="postImageUrl" placeholder="https://...">
+    </div>
+    <button class="modal-submit" id="postSubmitBtn">등록하기</button>
+    <div class="auth-msg" id="postModalMsg" style="color:#C0503A;"></div>
+  </div>
+</div>
+
+<!-- ---------- 게시글 상세보기 모달 ---------- -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>게시글</h3>
+      <button class="modal-close" id="detailModalClose">✕</button>
+    </div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ============================================================
+  // Supabase 초기화
+  // ============================================================
+  const SUPABASE_URL = "https://idswpgvoipgbuehvkryy.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_W1bOpC1_zqv66Ur0wLUAdQ_pKIjOCBd";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // 테이블 접두어: mc_ (Marathon Club)
+  const T = {
+    regions: 'mc_regions',
+    profiles: 'mc_profiles',
+    meetups: 'mc_meetups',
+    registrations: 'mc_registrations',
+    posts: 'mc_posts',
+    comments: 'mc_comments'
+  };
+
+  let currentUser = null;
+  let currentProfile = null;
+  let currentFilter = "전체";
+  let currentBoardFilter = "전체";
+  let regionsCache = [];
+  let meetupsCache = [];
+  let postsCache = [];
+  let myRegistrations = new Set();
+  let editingPostId = null; // null이면 새 글쓰기, 값이 있으면 수정 모드
+  let activeDetailPostId = null;
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+
+  function showToast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  function fmtDate(dateStr) {
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function requireLogin(actionLabel) {
+    if (!currentUser) {
+      showToast(`로그인 후 ${actionLabel} 가능해요 🙂`);
+      $('#join').scrollIntoView({ behavior: 'smooth' });
+      return false;
+    }
+    return true;
+  }
+
+  const RIVER_EMOJIS = ['🌊','🌉','🌳','🌸'];
+  const CATEGORY_BADGE = { '공지사항': 'notice', '자유게시판': 'free', '인증샷': 'photo' };
+  const CATEGORY_ICON = { '공지사항': '📌', '자유게시판': '💬', '인증샷': '📸' };
+
+  // ============================================================
+  // 지역 불러오기
+  // ============================================================
+  async function loadRegions() {
+    const { data, error } = await sb.from(T.regions).select('*').order('name');
+    const grid = $('#regionGrid');
+    const select = $('#suRegion');
+
+    if (error) {
+      grid.innerHTML = `<div class="empty-state">지역 정보를 불러오지 못했습니다. Supabase에 ${T.regions} 테이블이 준비되었는지 확인해주세요.</div>`;
+      return;
+    }
+    regionsCache = data || [];
+    $('#statRegions').textContent = regionsCache.length;
+
+    if (regionsCache.length === 0) {
+      grid.innerHTML = `<div class="empty-state">아직 등록된 지역이 없습니다.</div>`;
+      return;
+    }
+
+    grid.innerHTML = regionsCache.map((r, i) => `
+      <div class="region-card" data-region="${r.id}">
+        <div class="river-emoji">${RIVER_EMOJIS[i % RIVER_EMOJIS.length]}</div>
+        <h4>${r.name}</h4>
+        <p>${r.description || ''}</p>
+        <div class="count">${r.city}</div>
+      </div>
+    `).join('');
+
+    select.innerHTML = `<option value="">지역을 선택하세요</option>` +
+      regionsCache.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+  }
+
+  // ============================================================
+  // 모임 불러오기 / 신청 (기존 기능)
+  // ============================================================
+  async function loadMeetups() {
+    const { data, error } = await sb
+      .from(T.meetups)
+      .select(`*, ${T.regions}(name)`)
+      .order('meetup_date', { ascending: true });
+
+    const list = $('#meetupList');
+    if (error) {
+      list.innerHTML = `<div class="empty-state">모임 정보를 불러오지 못했습니다. Supabase에 ${T.meetups} 테이블이 준비되었는지 확인해주세요.</div>`;
+      return;
+    }
+    meetupsCache = data || [];
+    $('#statMeetups').textContent = meetupsCache.length;
+    renderMeetups();
+  }
+
+  async function loadMyRegistrations() {
+    if (!currentUser) { myRegistrations = new Set(); return; }
+    const { data } = await sb.from(T.registrations)
+      .select('meetup_id')
+      .eq('profile_id', currentUser.id)
+      .eq('status', '신청완료');
+    myRegistrations = new Set((data || []).map(r => r.meetup_id));
+  }
+
+  function renderMeetups() {
+    const list = $('#meetupList');
+    const filtered = currentFilter === '전체' ? meetupsCache : meetupsCache.filter(m => m.type === currentFilter);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="empty-state">등록된 ${currentFilter === '전체' ? '' : currentFilter + ' '}모임이 아직 없습니다.</div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(m => {
+      const d = new Date(m.meetup_date);
+      const day = d.getDate();
+      const month = `${d.getMonth() + 1}월`;
+      const weekday = ['일','월','화','수','목','금','토'][d.getDay()];
+      const time = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const applied = myRegistrations.has(m.id);
+      const badgeClass = m.type === '정기모임' ? 'quarter' : 'weekly';
+      const regionName = m[T.regions]?.name || '';
+
+      return `
+        <div class="meetup-row">
+          <div class="meetup-date"><div class="d">${day}</div><div class="m">${month} (${weekday})</div></div>
+          <div class="meetup-info">
+            <span class="badge ${badgeClass}">${m.type === '정기모임' ? '🏁 정기모임' : '🌤️ 소모임'}</span>
+            <h4>${m.title}</h4>
+            <div class="meta">
+              <span>📍 ${regionName ? regionName + ' · ' : ''}${m.location_name}</span>
+              <span>🕐 ${time}</span>
+              ${m.pace_target ? `<span>⏱️ ${m.pace_target}</span>` : ''}
+            </div>
+          </div>
+          <div class="meetup-stat"><div class="v">${m.distance_km ? m.distance_km + 'km' : '-'}</div><div class="l">거리</div></div>
+          <button class="apply-btn ${applied ? 'applied' : ''}" data-meetup="${m.id}">${applied ? '신청완료 ✓' : '참가 신청'}</button>
+        </div>
+      `;
+    }).join('');
+
+    $$('.apply-btn').forEach(btn => btn.addEventListener('click', () => handleApply(btn.dataset.meetup, btn)));
+  }
+
+  async function handleApply(meetupId, btn) {
+    if (!requireLogin('신청')) return;
+    if (myRegistrations.has(meetupId)) { showToast('이미 신청한 모임이에요!'); return; }
+    btn.disabled = true; btn.textContent = '신청 중…';
+
+    const { error } = await sb.from(T.registrations).insert({ meetup_id: meetupId, profile_id: currentUser.id, status: '신청완료' });
+    if (error) { btn.disabled = false; btn.textContent = '참가 신청'; showToast('신청에 실패했습니다: ' + error.message); return; }
+
+    myRegistrations.add(meetupId);
+    showToast('참가 신청이 완료됐어요! 🏃‍♀️');
+    renderMeetups();
+  }
+
+  $$('.filter-chip[data-filter]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      $$('.filter-chip[data-filter]').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilter = chip.dataset.filter;
+      renderMeetups();
+    });
+  });
+
+  // ============================================================
+  // 게시판 CRUD
+  // ============================================================
+  async function loadPosts() {
+    const { data, error } = await sb
+      .from(T.posts)
+      .select(`*, ${T.profiles}(nickname), ${T.comments}(id)`)
+      .order('created_at', { ascending: false });
+
+    const list = $('#boardList');
+    if (error) {
+      list.innerHTML = `<div class="empty-state">게시글을 불러오지 못했습니다. Supabase에 ${T.posts} 테이블이 준비되었는지 확인해주세요.</div>`;
+      return;
+    }
+    postsCache = data || [];
+    renderBoard();
+  }
+
+  function renderBoard() {
+    const list = $('#boardList');
+    const filtered = currentBoardFilter === '전체' ? postsCache : postsCache.filter(p => p.category === currentBoardFilter);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="empty-state">등록된 ${currentBoardFilter === '전체' ? '' : currentBoardFilter + ' '}게시글이 아직 없습니다. 첫 글을 남겨보세요!</div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(p => {
+      const badgeClass = CATEGORY_BADGE[p.category];
+      const author = p[T.profiles]?.nickname || '탈퇴한 회원';
+      const commentCount = (p[T.comments] || []).length;
+      return `
+        <div class="post-row" data-post="${p.id}">
+          <div class="cat"><span class="badge ${badgeClass}">${CATEGORY_ICON[p.category]}</span></div>
+          <div class="title-cell"><span class="t">${escapeHtml(p.title)}</span>${commentCount > 0 ? `<span class="cmt-count">[${commentCount}]</span>` : ''}</div>
+          <div class="author">${escapeHtml(author)}</div>
+          <div class="date">${fmtDate(p.created_at)}</div>
+          <div class="views">👁 ${p.view_count || 0}</div>
+        </div>
+      `;
+    }).join('');
+
+    $$('.post-row').forEach(row => row.addEventListener('click', () => openDetailModal(row.dataset.post)));
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+  }
+
+  $$('.filter-chip[data-board-filter]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      $$('.filter-chip[data-board-filter]').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentBoardFilter = chip.dataset.boardFilter;
+      renderBoard();
+    });
+  });
+
+  // ---------- 글쓰기 / 수정 모달 ----------
+  function openPostModal(mode, post) {
+    if (!requireLogin('글쓰기가')) return;
+    editingPostId = mode === 'edit' ? post.id : null;
+    $('#postModalTitle').textContent = mode === 'edit' ? '게시글 수정' : '새 글쓰기';
+    $('#postCategory').value = mode === 'edit' ? post.category : '자유게시판';
+    $('#postTitle').value = mode === 'edit' ? post.title : '';
+    $('#postContent').value = mode === 'edit' ? post.content : '';
+    $('#postImageUrl').value = mode === 'edit' ? (post.image_url || '') : '';
+    $('#postModalMsg').textContent = '';
+    $('#postSubmitBtn').textContent = mode === 'edit' ? '수정 완료' : '등록하기';
+    $('#postModal').classList.add('show');
+  }
+  function closePostModal() { $('#postModal').classList.remove('show'); }
+
+  $('#writePostBtn').addEventListener('click', () => openPostModal('create'));
+  $('#postModalClose').addEventListener('click', closePostModal);
+  $('#postModal').addEventListener('click', (e) => { if (e.target.id === 'postModal') closePostModal(); });
+
+  $('#postSubmitBtn').addEventListener('click', async () => {
+    const category = $('#postCategory').value;
+    const title = $('#postTitle').value.trim();
+    const content = $('#postContent').value.trim();
+    const imageUrl = $('#postImageUrl').value.trim();
+    const msg = $('#postModalMsg');
+
+    if (!title || !content) { msg.textContent = '제목과 내용을 모두 입력해주세요.'; return; }
+    if (!currentUser) { msg.textContent = '로그인이 필요합니다.'; return; }
+
+    $('#postSubmitBtn').disabled = true;
+
+    if (editingPostId) {
+      const { error } = await sb.from(T.posts).update({
+        category, title, content, image_url: imageUrl || null, updated_at: new Date().toISOString()
+      }).eq('id', editingPostId);
+      $('#postSubmitBtn').disabled = false;
+      if (error) { msg.textContent = '수정 실패: ' + error.message; return; }
+      showToast('게시글이 수정됐어요.');
+    } else {
+      const { error } = await sb.from(T.posts).insert({
+        category, title, content, image_url: imageUrl || null, author_id: currentUser.id
+      });
+      $('#postSubmitBtn').disabled = false;
+      if (error) { msg.textContent = '등록 실패: ' + error.message; return; }
+      showToast('게시글이 등록됐어요. 🎉');
+    }
+
+    closePostModal();
+    await loadPosts();
+  });
+
+  // ---------- 상세보기 모달 (조회 + 댓글 CRUD + 수정/삭제 진입점) ----------
+  async function openDetailModal(postId) {
+    activeDetailPostId = postId;
+    const post = postsCache.find(p => p.id === postId);
+    if (!post) return;
+
+    // 조회수 증가 (RPC, RLS 우회)
+    sb.rpc('mc_increment_view_count', { p_post_id: postId }).then(() => {
+      post.view_count = (post.view_count || 0) + 1;
+    });
+
+    renderDetailModal(post);
+    $('#detailModal').classList.add('show');
+    await loadComments(postId);
+  }
+
+  function renderDetailModal(post) {
+    const author = post[T.profiles]?.nickname || '탈퇴한 회원';
+    const isOwner = currentUser && post.author_id === currentUser.id;
+    const badgeClass = CATEGORY_BADGE[post.category];
+
+    $('#detailBody').innerHTML = `
+      <span class="detail-badge badge ${badgeClass}">${CATEGORY_ICON[post.category]} ${post.category}</span>
+      <div class="detail-title">${escapeHtml(post.title)}</div>
+      <div class="detail-meta">
+        <span>✍️ ${escapeHtml(author)}</span>
+        <span>📅 ${fmtDate(post.created_at)}</span>
+        <span>👁 조회 ${post.view_count || 0}</span>
+      </div>
+      ${post.image_url ? `<img class="detail-image" src="${escapeHtml(post.image_url)}" alt="게시글 이미지" onerror="this.style.display='none'">` : ''}
+      <div class="detail-content">${escapeHtml(post.content)}</div>
+      ${isOwner ? `
+        <div class="detail-actions">
+          <button id="editPostBtn">수정</button>
+          <button id="deletePostBtn" class="danger">삭제</button>
+        </div>` : ''}
+      <div class="comments-head">댓글</div>
+      <div id="commentsList"><div class="comments-empty">댓글을 불러오는 중…</div></div>
+      <div class="comment-form">
+        <textarea id="newCommentText" placeholder="${currentUser ? '댓글을 입력하세요' : '로그인 후 댓글을 남길 수 있어요'}" ${currentUser ? '' : 'disabled'}></textarea>
+        <button id="submitCommentBtn">등록</button>
+      </div>
+    `;
+
+    if (isOwner) {
+      $('#editPostBtn').addEventListener('click', () => { closeDetailModal(); openPostModal('edit', post); });
+      $('#deletePostBtn').addEventListener('click', () => handleDeletePost(post.id));
+    }
+    $('#submitCommentBtn').addEventListener('click', () => handleAddComment(post.id));
+  }
+
+  async function handleDeletePost(postId) {
+    if (!confirm('이 게시글을 삭제할까요? 댓글도 함께 삭제됩니다.')) return;
+    const { error } = await sb.from(T.posts).delete().eq('id', postId);
+    if (error) { showToast('삭제 실패: ' + error.message); return; }
+    showToast('게시글이 삭제됐어요.');
+    closeDetailModal();
+    await loadPosts();
+  }
+
+  function closeDetailModal() { $('#detailModal').classList.remove('show'); activeDetailPostId = null; }
+  $('#detailModalClose').addEventListener('click', closeDetailModal);
+  $('#detailModal').addEventListener('click', (e) => { if (e.target.id === 'detailModal') closeDetailModal(); });
+
+  // ---------- 댓글 CRUD ----------
+  async function loadComments(postId) {
+    const { data, error } = await sb
+      .from(T.comments)
+      .select(`*, ${T.profiles}(nickname)`)
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true });
+
+    const box = $('#commentsList');
+    if (!box) return;
+
+    if (error) { box.innerHTML = `<div class="comments-empty">댓글을 불러오지 못했습니다.</div>`; return; }
+    if (!data || data.length === 0) { box.innerHTML = `<div class="comments-empty">아직 댓글이 없어요. 첫 댓글을 남겨보세요!</div>`; return; }
+
+    box.innerHTML = data.map(c => {
+      const author = c[T.profiles]?.nickname || '탈퇴한 회원';
+      const isOwner = currentUser && c.author_id === currentUser.id;
+      return `
+        <div class="comment-item" data-comment="${c.id}">
+          <div class="c-top"><span class="c-author">${escapeHtml(author)}</span><span class="c-date">${fmtDate(c.created_at)}</span></div>
+          <div class="c-content">${escapeHtml(c.content)}</div>
+          ${isOwner ? `<div class="c-del" data-del-comment="${c.id}">삭제</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    $$('[data-del-comment]').forEach(el => {
+      el.addEventListener('click', () => handleDeleteComment(el.dataset.delComment, postId));
+    });
+  }
+
+  async function handleAddComment(postId) {
+    if (!requireLogin('댓글 작성이')) return;
+    const textEl = $('#newCommentText');
+    const content = textEl.value.trim();
+    if (!content) return;
+
+    const { error } = await sb.from(T.comments).insert({ post_id: postId, author_id: currentUser.id, content });
+    if (error) { showToast('댓글 등록 실패: ' + error.message); return; }
+    textEl.value = '';
+    await loadComments(postId);
+    // 게시글 목록의 댓글 수 갱신을 위해 postsCache 재조회는 다음 loadPosts에서 반영
+  }
+
+  async function handleDeleteComment(commentId, postId) {
+    if (!confirm('댓글을 삭제할까요?')) return;
+    const { error } = await sb.from(T.comments).delete().eq('id', commentId);
+    if (error) { showToast('삭제 실패: ' + error.message); return; }
+    await loadComments(postId);
+  }
+
+  // ============================================================
+  // 인증 (회원가입 / 로그인 / 로그아웃)
+  // ============================================================
+  $('#tabSignup').addEventListener('click', () => {
+    $('#tabSignup').classList.add('active'); $('#tabLogin').classList.remove('active');
+    $('#signupForm').style.display = 'block'; $('#loginForm').style.display = 'none';
+  });
+  $('#tabLogin').addEventListener('click', () => {
+    $('#tabLogin').classList.add('active'); $('#tabSignup').classList.remove('active');
+    $('#loginForm').style.display = 'block'; $('#signupForm').style.display = 'none';
+  });
+  $('#loginBtn').addEventListener('click', (e) => {
+    e.preventDefault(); $('#tabLogin').click();
+    $('#join').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  $('#signupBtn').addEventListener('click', async () => {
+    const email = $('#suEmail').value.trim();
+    const password = $('#suPassword').value;
+    const nickname = $('#suNickname').value.trim();
+    const regionId = $('#suRegion').value;
+    const pace = $('#suPace').value;
+    const msg = $('#signupMsg');
+
+    if (!email || !password || !nickname) {
+      msg.textContent = '이메일, 비밀번호, 닉네임을 모두 입력해주세요.'; msg.style.color = '#F0956B'; return;
+    }
+    msg.textContent = '가입 처리 중…'; msg.style.color = 'rgba(255,255,255,.7)';
+
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if (error) { msg.textContent = error.message; msg.style.color = '#F0956B'; return; }
+
+    const userId = data.user?.id;
+    if (userId) {
+      await sb.from(T.profiles).insert({ id: userId, nickname, region_id: regionId || null, pace_level: pace });
+    }
+
+    msg.textContent = '가입 완료! 확인 이메일을 보냈다면 인증 후 로그인해주세요.'; msg.style.color = '#8FD3C7';
+    showToast('회원가입이 완료됐습니다 🎉');
+    setTimeout(() => location.reload(), 1800);
+  });
+
+  $('#loginSubmitBtn').addEventListener('click', async () => {
+    const email = $('#liEmail').value.trim();
+    const password = $('#liPassword').value;
+    const msg = $('#loginMsg');
+
+    if (!email || !password) { msg.textContent = '이메일과 비밀번호를 입력해주세요.'; msg.style.color = '#F0956B'; return; }
+    msg.textContent = '로그인 중…'; msg.style.color = 'rgba(255,255,255,.7)';
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) { msg.textContent = error.message; msg.style.color = '#F0956B'; return; }
+
+    showToast('로그인되었습니다 👋');
+    await refreshAuthState();
+  });
+
+  $('#logoutBtn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    showToast('로그아웃되었습니다');
+    await refreshAuthState();
+  });
+
+  async function refreshAuthState() {
+    const { data: { session } } = await sb.auth.getSession();
+    currentUser = session?.user || null;
+
+    if (currentUser) {
+      const { data: profile } = await sb.from(T.profiles).select('nickname').eq('id', currentUser.id).single();
+      currentProfile = profile;
+      $('#userBadge').textContent = `🏃 ${profile?.nickname || currentUser.email}님`;
+      $('#userBadge').style.display = 'flex';
+      $('#loginBtn').style.display = 'none';
+      $('#logoutBtn').style.display = 'inline-block';
+    } else {
+      currentProfile = null;
+      $('#userBadge').style.display = 'none';
+      $('#loginBtn').style.display = 'inline-block';
+      $('#logoutBtn').style.display = 'none';
+    }
+    await loadMyRegistrations();
+    renderMeetups();
+    renderBoard();
+  }
+
+  async function loadMemberCount() {
+    const { count } = await sb.from(T.profiles).select('*', { count: 'exact', head: true });
+    $('#statMembers').textContent = count ?? '-';
+  }
+
+  // ============================================================
+  // 초기화
+  // ============================================================
+  (async function init() {
+    await loadRegions();
+    await refreshAuthState();
+    await loadMeetups();
+    await loadPosts();
+    await loadMemberCount();
+  })();
+</script>
+
+</body>
+</html>
